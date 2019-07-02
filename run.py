@@ -4,7 +4,7 @@ from apscheduler.jobstores.mongodb import MongoDBJobStore
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from pymongo import MongoClient
 import logging
-from flask import Flask, request
+from flask import Flask, request, current_app
 from flask_restplus import Api, Resource, Namespace, fields
 from flask_cors import CORS
 from datetime import datetime
@@ -87,7 +87,7 @@ class JobSchedule(Resource):
     @api.doc('Get scheduler state')
     def get(self):
         logger.info("REsT API received a request : {}. request body contains : {}".format(request, request.json))
-        scheduler_state = "RUNNING" if JobScheduler().state == 1 else "NOT RUNNING"
+        scheduler_state = "RUNNING" if current_app.apscheduler.state == 1 else "NOT RUNNING"
         return {"Scheduler state": scheduler_state}
 @api.route('/<string:schedule_id>')
 @api.param('schedule_id', 'Schedule ID')
@@ -95,7 +95,7 @@ class JobScheduleRoute(Resource):
     @api.doc('Get a job schedule info')
     def get(self, schedule_id):
         logger.info("REsT API received a request : {}. request body contains : {}".format(request, request.json))
-        job_schedule = JobScheduler().get_job(schedule_id)
+        job_schedule = current_app.apscheduler.get_job(schedule_id)
         return job_schedule
 
 _job_schedule_api = api
